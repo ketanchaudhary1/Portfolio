@@ -19,7 +19,7 @@ app=FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000","https://portfolio1-five-chi-58.vercel.app"],
+    allow_origins=["https://portfolio1-five-chi-58.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
