@@ -27,7 +27,7 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/chat", {
+      const response = await fetch("https://your-backend-project.vercel.app/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
