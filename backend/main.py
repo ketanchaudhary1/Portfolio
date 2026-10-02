@@ -3,11 +3,15 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
 from groq import Groq
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pypdf import PdfReader
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
 load_dotenv()
 
 client = Groq(
@@ -15,8 +19,16 @@ client = Groq(
 )
 
 model = "openai/gpt-oss-120b"
-app=FastAPI()
 
+limiter = Limiter(key_func=get_remote_address)
+
+app = FastAPI()
+
+app.state.limiter = limiter
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://portfolio1-five-chi-58.vercel.app"],
@@ -175,9 +187,9 @@ def home():
     return {
         "message" : "Ye home page hai"
     }
-
 @app.post("/chat")
-def chat(request: ChatRequest):
+@limiter.limit("300/day")
+def chat(request: ChatRequest, http_request: Request):
     resume_text = read_pdf(
     Path(__file__).parent / "Ketan_Chaudhary_sept.pdf")
     resume=parse_resume(resume_text)
